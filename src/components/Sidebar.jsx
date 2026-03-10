@@ -1,4 +1,4 @@
-import { NavLink, useNavigation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Users, Settings, LogOut, Sun, Moon, Menu, X, Loader2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useContext, useState } from 'react';
