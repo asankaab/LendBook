@@ -1,8 +1,7 @@
-
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { api } from '../lib/api';
+import { client } from '../lib/neon';
 import { AuthContext } from './context';
+import { api } from '../lib/api';
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -10,43 +9,76 @@ export const AuthProvider = ({ children }) => {
     const [currency, setCurrency] = useState('USD');
 
     useEffect(() => {
-        // Check active sessions and sets the user
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user ?? null);
-            setLoading(false);
-        });
+        const checkSession = async () => {
+            try {
+                const result = await client.auth.getSession();
+                if (result.data?.user) {
+                    setUser(result.data.user);
+                }
+            } catch (error) {
+                console.error('Error getting session:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        // Listen for changes on auth state (logged in, signed out, etc.)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-            setLoading(false);
-        });
+        checkSession();
+    }, []);
 
+    useEffect(() => {
         const loadProfile = async () => {
             if (!user?.id) return;
-            const profile = await api.getProfile(user?.id);
-            setCurrency(profile.currency.toUpperCase());
+            try {
+                const profile = await api.getProfile(user.id);
+                if (profile?.currency) {
+                    setCurrency(profile.currency.toUpperCase());
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
         };
-
         loadProfile();
-
-        return () => {
-            subscription.unsubscribe();
-            loadProfile();
-        };
     }, [user?.id]);
 
     const value = {
-        signInWithGoogle: () => supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: import.meta.env.VITE_SITE_URL } }),
-        signInWithPassword: (email, password) => supabase.auth.signInWithPassword({ email, password }),
-        signUpWithPassword: (email, password) => supabase.auth.signUp({ email, password }),
-        signInWithMagicLink: (data) => supabase.auth.signInWithOtp({
-                email: data.email,
-                options: {
-                    emailRedirectTo: import.meta.env.VITE_SITE_URL
-                }
-            }),
-        signOut: () => supabase.auth.signOut(),
+        signInWithPassword: async (email, password) => {
+            const result = await client.auth.signIn.email({ email, password });
+            if (!result.error && result.data?.user) {
+                setUser(result.data.user);
+            }
+            return result;
+        },
+        signUpWithPassword: async (email, password) => {
+            const name = email.split('@')[0] || 'User';
+            const result = await client.auth.signUp.email({ email, password, name });
+            if (!result.error && result.data?.user) {
+                setUser(result.data.user);
+            }
+            return result;
+        },
+        signInWithGoogle: async () => {
+            return await client.auth.signIn.social({
+                provider: 'google',
+                callbackURL: import.meta.env.VITE_SITE_URL
+            });
+        },
+        signInWithMagicLink: async ({ email }) => {
+            return await client.auth.emailOtp.sendVerificationOtp({
+                email,
+                type: 'sign-in'
+            });
+        },
+        verifyMagicLink: async ({ email, otp }) => {
+            const result = await client.auth.signIn.emailOtp({ email, otp });
+            if (!result.error && result.data?.user) {
+                setUser(result.data.user);
+            }
+            return result;
+        },
+        signOut: async () => {
+            await client.auth.signOut();
+            setUser(null);
+        },
         user,
         loading,
         currency,

@@ -112,7 +112,7 @@ export default function People() {
                 {people
                     .filter((person) => {
                         const searchLower = searchQuery.toLowerCase();
-                        return person.name.toLowerCase().includes(searchLower) || person.username.toLowerCase().includes(searchLower);
+                        return person.username && person.username.includes(searchLower);
                     })
                     .map((person) => (
                         <div

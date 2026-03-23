@@ -4,14 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite",
+    "dev+host": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@neondatabase/neon-js": "^0.2.0-beta.1",
-    "@vercel/blob": "^0.24.0",
+    "@vercel/blob": "^0.24.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.559.0",
     "react": "^19.2.0",

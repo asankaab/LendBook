@@ -25,10 +25,10 @@ export const peopleLoader = async () => {
     // Initialize map with all people
     const peopleMap = {};
 
-    // 1. Add all existing people to the map
+    // 1. Add all existing people to the map with balance 0
     allPeople.forEach(person => {
         peopleMap[person.username] = {
-            id: person.username,
+            id: person.id,
             name: person.name,
             username: person.username,
             balance: 0,
@@ -37,24 +37,35 @@ export const peopleLoader = async () => {
 
     // 2. Process transactions to calculate balances
     transactions.forEach(tx => {
-        const name = tx.person_name;
-        const username = tx.person_username || name.toLowerCase().replace(/\s+/g, '_');
+        const username = tx.people?.username;
+        const amount = parseFloat(tx.amount) || 0;
 
-        // Ensure person exists in map (legacy/fallback if not in people table)
+        // Only process if username exists
+        if (!username) return;
+
+        // Ensure person exists in map
         if (!peopleMap[username]) {
             peopleMap[username] = {
-                id: username,
-                name: name,
+                id: tx.people?.id || username,
+                name: tx.people?.name || username,
                 username: username,
                 balance: 0,
             };
         }
 
-        const amount = parseFloat(tx.amount);
+        // Calculate balance based on transaction type
         if (tx.type === 'lend') {
+            // You lent money - they owe you
             peopleMap[username].balance += amount;
-        } else {
+        } else if (tx.type === 'borrow') {
+            // You borrowed money - you owe them
             peopleMap[username].balance -= amount;
+        } else if (tx.type === 'repayment') {
+            // They're repaying what they owe
+            peopleMap[username].balance -= amount;
+        } else if (tx.type === 'paid_back') {
+            // You're paying back what you owe
+            peopleMap[username].balance += amount;
         }
     });
 
@@ -69,16 +80,16 @@ export const personDetailsLoader = async ({ params }) => {
     // Set display name from first transaction or username
     let personName = user_id;
     if (txs.length > 0) {
-        personName = txs[0].person_name;
+        personName = txs[0].people?.name || user_id;
     }
 
     // Calculate balance
     const balance = txs.reduce((acc, tx) => {
-        const amount = parseFloat(tx.amount);
+        const amount = parseFloat(tx.amount) || 0;
         if (tx.type === 'lend') return acc + amount;
         if (tx.type === 'borrow') return acc - amount;
-        if (tx.type === 'repayment') return acc - amount; // Repayment (received) reduces the positive balance (debt to me)
-        if (tx.type === 'paid_back') return acc + amount; // Paid back (I paid) increases the positive balance (reduces debt I owe)
+        if (tx.type === 'repayment') return acc - amount;
+        if (tx.type === 'paid_back') return acc + amount;
         return acc;
     }, 0);
 
