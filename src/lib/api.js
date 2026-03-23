@@ -22,8 +22,8 @@ export const api = {
     getTransactionsByPerson: async (username) => {
         const { data, error } = await client
             .from('transactions')
-            .select('*, people(name, username)')
-            .eq('people.username', username)
+            .select('*')
+            .eq('username', username)
             .order('created_at', { ascending: false });
         if (error) throw error;
         return data || [];

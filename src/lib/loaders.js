@@ -83,15 +83,9 @@ export const personDetailsLoader = async ({ params }) => {
         personName = txs[0].people?.name || user_id;
     }
 
-    // Calculate balance
-    const balance = txs.reduce((acc, tx) => {
-        const amount = parseFloat(tx.amount) || 0;
-        if (tx.type === 'lend') return acc + amount;
-        if (tx.type === 'borrow') return acc - amount;
-        if (tx.type === 'repayment') return acc - amount;
-        if (tx.type === 'paid_back') return acc + amount;
-        return acc;
-    }, 0);
+    // Calculate balance for this specific person
+    let balance = 0;
+    balance = await api.getPersonBalance(username)
 
     return { transactions: txs, balance, personName, username };
 };
