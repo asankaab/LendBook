@@ -75,17 +75,22 @@ export const peopleLoader = async () => {
 export const personDetailsLoader = async ({ params }) => {
     const { username } = params;
     const user_id = decodeURIComponent(username);
+    
+    // Check if person exists in database
+    const people = await api.getPeople();
+    const personExists = people.find(person => person.username === user_id);
+    
+    if (!personExists) {
+        throw new Error(`Person with username "${user_id}" not found`);
+    }
+    
     const txs = await api.getTransactionsByPerson(user_id);
 
-    // Set display name from first transaction or username
-    let personName = user_id;
-    if (txs.length > 0) {
-        personName = txs[0].people?.name || user_id;
-    }
+    // Set display name from person or first transaction
+    let personName = personExists.name || user_id;
 
     // Calculate balance for this specific person
-    let balance = 0;
-    balance = await api.getPersonBalance(username)
+    const balance = await api.getPersonBalance(username)
 
     return { transactions: txs, balance, personName, username };
 };

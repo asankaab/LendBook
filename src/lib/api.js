@@ -57,22 +57,38 @@ export const api = {
         username = username ? username.toLowerCase().trim().replace(/[^a-z0-9_]+/g, '_') : 'unknown_user';
         name = name ? name.trim() : username;
 
-        // Upsert person
-        const { data: personData, error: personError } = await client
+        // Check if person with this username already exists
+        const { data: existingPerson, error: checkError } = await client
             .from('people')
-            .upsert({ user_id: userId, username, name }, { onConflict: ['user_id', 'username'] })
-            .select();
-        if (personError) throw personError;
-        const person = personData?.[0];
+            .select('id')
+            .eq('username', username)
+            .single();
+        
+        // PGRST116 is the error code for "The result contains 0 rows"
+        if (checkError && checkError.code !== 'PGRST116') throw checkError;
+
+        let person;
+        
+        if (existingPerson) {
+            // Person already exists, use existing person
+            person = existingPerson;
+        } else {
+            // Person doesn't exist, create new person
+            const { data: personData, error: personError } = await client
+                .from('people')
+                .insert({ username, name })
+                .select();
+            if (personError) throw personError;
+            person = personData?.[0];
+        }
 
         const { username: _, person_name: __, ...transactionData } = transaction;
 
         const { data: newTransaction, error: transError } = await client
             .from('transactions')
             .insert({
-                user_id: userId,
                 person_id: person.id,
-                person_username: username,
+                username: username,
                 ...transactionData
             })
             .select();
@@ -100,12 +116,12 @@ export const api = {
         return data || [];
     },
 
-    createPerson: async (userId, { name, username }) => {
-        const finalUsername = username && username.trim() ? username.trim() : name.toLowerCase().trim().replace(/\s+/g, '_');
+    createPerson: async ({ name, username }) => {
+        const finalUsername = username ? username.toLowerCase().trim() : name.toLowerCase().trim().replace(/\s+/g, '_');
 
         const { data, error } = await client
             .from('people')
-            .insert({ user_id: userId, name, username: finalUsername })
+            .insert({ name, username: finalUsername })
             .select();
         if (error) throw error;
         return data?.[0];

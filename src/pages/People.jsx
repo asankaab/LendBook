@@ -23,7 +23,7 @@ export default function People() {
     };
 
     const handleCreatePerson = async ({ name, username }) => {
-        await api.createPerson(user.id, { name, username });
+        await api.createPerson({ name, username });
         revalidate();
     };
 
