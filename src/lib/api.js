@@ -157,29 +157,21 @@ export const api = {
                 throw new Error('No file provided');
             }
 
-            try {
+            // Call blob storage to handle upload
+            const response = await blob.upload(`${userId}/avatar`, file, {
+                access: 'public',
+                allowOverwrite: true
+            });
 
-                // Call backend API to handle upload
-                const response = await blob.upload(`${userId}/avatar`, file, {
-                    access: 'public',
-                    allowOverwrite: true
-                });
-
-                if (!response) {
-                    throw new Error('Upload failed');
-                }
-
-                // Update profile with new avatar URL
-                const { data } = await client.auth.updateUser({image: response.url})
-                
-                if (!data.status) throw Error('Error updating profile picture!');
-
-                return data.url
-
-            } catch (error) {
-                console.error('Avatar upload error:', error);
-                
+            if (!response) {
+                throw new Error('Upload failed');
             }
+
+            // Update auth user profile with new avatar URL
+            const { error } = await client.auth.updateUser({ image: response.url });
+            if (error) throw error;
+
+            return response.url;
 
         } catch (error) {
             console.error('Avatar upload error:', error);
@@ -189,7 +181,7 @@ export const api = {
 
     deleteAvatar: async (userId) => {
         try {
-            // Call backend API to handle deletion
+            // Delete from blob storage
             const response = await fetch('/api/upload', {
                 method: 'POST',
                 headers: {
@@ -205,8 +197,9 @@ export const api = {
                 throw new Error('Delete failed');
             }
 
-            // Clear avatar URL from profile
-            await api.updateProfile(userId, { avatar_url: null });
+            // Clear image from auth user profile
+            const { error } = await client.auth.updateUser({ image: null });
+            if (error) throw error;
         } catch (error) {
             console.error('Avatar deletion error:', error);
             throw error;

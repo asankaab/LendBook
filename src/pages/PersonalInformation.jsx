@@ -91,7 +91,6 @@ export default function PersonalInformation() {
 
         try {
             const publicUrl = await api.uploadAvatar(user.id, file);
-            console.log(publicUrl)
             setFormData(prev => ({ ...prev, image: publicUrl }));
             setMessage('Profile picture updated successfully!');
         } catch (error) {
