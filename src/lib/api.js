@@ -182,20 +182,7 @@ export const api = {
     deleteAvatar: async (userId) => {
         try {
             // Delete from blob storage
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'delete',
-                    userId,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Delete failed');
-            }
+            await blob.del(`${userId}/avatar`);
 
             // Clear image from auth user profile
             const { error } = await client.auth.updateUser({ image: null });
