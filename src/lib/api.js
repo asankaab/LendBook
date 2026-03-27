@@ -1,5 +1,4 @@
 import { client } from "./neon";
-import blob from './vercel-blob.js';
 
 
 export const api = {
@@ -134,11 +133,8 @@ export const api = {
         return data;
     },
 
-    updateProfile: async (userId, updates) => {
-        const { data, error } = await client
-            .from('profiles')
-            .upsert({ user_id: userId, ...updates })
-            .select();
+    updateProfile: async (updates) => {
+        const { data, error } = await client.auth.updateUser(updates)
         if (error) throw error;
         return data?.[0];
     },
@@ -154,31 +150,87 @@ export const api = {
     },
 
     uploadAvatar: async (userId, file) => {
-        const fileExt = file.name.split('.').pop();
-        const timestamp = Math.floor(Date.now() / 1000);
-        const fileName = `${userId}/avatar_v${timestamp}.${fileExt}`;
+        try {
+            if (!file) {
+                throw new Error('No file provided');
+            }
 
-        // Delete old avatar if exists
-        const { blobs } = await blob.list({ prefix: `${userId}/` });
-        if (blobs.length > 0) {
-            await blob.del(blobs.map(b => b.url));
+            // Convert file to base64
+            const reader = new FileReader();
+            return new Promise((resolve, reject) => {
+                reader.onload = async () => {
+                    try {
+                        const base64 = reader.result.split(',')[1];
+                        const fileExt = file.name.split('.').pop();
+                        const timestamp = Math.floor(Date.now() / 1000);
+                        const fileName = `avatar_v${timestamp}.${fileExt}`;
+
+                        // Call backend API to handle upload
+                        const response = await fetch('/api/upload', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                action: 'upload',
+                                userId,
+                                file: base64,
+                                fileName,
+                            }),
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Upload failed');
+                        }
+
+                        const result = await response.json();
+
+                        if (!result.url) {
+                            throw new Error('No URL returned from upload');
+                        }
+
+                        // Update profile with new avatar URL
+                        await api.updateProfile(userId, { avatar_url: result.url });
+
+                        resolve(result.url);
+                    } catch (error) {
+                        console.error('Avatar upload error:', error);
+                        reject(error);
+                    }
+                };
+                reader.onerror = () => reject(reader.error);
+                reader.readAsDataURL(file);
+            });
+        } catch (error) {
+            console.error('Avatar upload error:', error);
+            throw error;
         }
-
-        const { url } = await blob.upload(fileName, file, {
-            access: 'public',
-        });
-
-        await api.updateProfile(userId, { avatar_url: url });
-
-        return url;
     },
 
     deleteAvatar: async (userId) => {
-        const { blobs } = await blob.list({ prefix: `${userId}/` });
-        if (blobs.length > 0) {
-            await blob.del(blobs.map(b => b.url));
+        try {
+            // Call backend API to handle deletion
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'delete',
+                    userId,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Delete failed');
+            }
+
+            // Clear avatar URL from profile
+            await api.updateProfile(userId, { avatar_url: null });
+        } catch (error) {
+            console.error('Avatar deletion error:', error);
+            throw error;
         }
-        await api.updateProfile(userId, { avatar_url: null });
     },
 
     // Dashboard Aggregates

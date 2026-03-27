@@ -58,9 +58,9 @@ export default function PersonalInformation() {
         setMessage('');
 
         try {
-            await api.updateProfile(user.id, {
-                full_name: formData.full_name,
-                updated_at: new Date()
+            await api.updateProfile({
+                name: formData.full_name,
+                image: 'testingurl'
             });
             setMessage('Profile updated successfully!');
         } catch (error) {
