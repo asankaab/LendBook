@@ -81,11 +81,12 @@ export default function Login() {
     };
 
     return (
-        <div className="flex items-center justify-center center h-screen">
-            <div className="glass" style={{ padding: '3rem', borderRadius: '1rem', width: '100%', maxWidth: '400px' }}>
-                <h1 style={{ marginBottom: '2rem', fontSize: '2rem', textAlign: 'center' }}>
-                    Lendbook
-                </h1>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+                <div className="glass" style={{ padding: '3rem', borderRadius: '1rem', width: '100%', maxWidth: '400px' }}>
+                    <h1 style={{ marginBottom: '2rem', fontSize: '2rem', textAlign: 'center' }}>
+                        Lendbook
+                    </h1>
 
                 {error && <div style={{ color: 'var(--danger)', fontSize: '0.875rem', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
                 {!error && magicLinkSent && (
@@ -220,11 +221,12 @@ export default function Login() {
                     <Loader2 style={{ animation: 'spin 1s linear infinite' }} size={20} />
                     <small>Redirecting...</small>
                 </div>}
+                </div>
             </div>
 
             {/* Footer Links */}
             <div style={{ 
-                marginTop: '2rem', 
+                padding: '2rem',
                 textAlign: 'center', 
                 fontSize: '0.875rem',
                 display: 'flex',
