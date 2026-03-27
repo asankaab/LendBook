@@ -1,4 +1,6 @@
+import { put } from "@vercel/blob";
 import { client } from "./neon";
+import blob from "./vercel-blob";
 
 
 export const api = {
@@ -127,7 +129,7 @@ export const api = {
     },
 
     // Profiles/People
-    getProfile: async (userId) => {
+    getProfile: async () => {
         const { data, error } = await client.auth.getSession()
         if (error && error.code !== 'PGRST116') throw error;
         return data;
@@ -155,52 +157,30 @@ export const api = {
                 throw new Error('No file provided');
             }
 
-            // Convert file to base64
-            const reader = new FileReader();
-            return new Promise((resolve, reject) => {
-                reader.onload = async () => {
-                    try {
-                        const base64 = reader.result.split(',')[1];
-                        const fileExt = file.name.split('.').pop();
-                        const timestamp = Math.floor(Date.now() / 1000);
-                        const fileName = `avatar_v${timestamp}.${fileExt}`;
+            try {
 
-                        // Call backend API to handle upload
-                        const response = await fetch('/api/upload', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                action: 'upload',
-                                userId,
-                                file: base64,
-                                fileName,
-                            }),
-                        });
+                // Call backend API to handle upload
+                const response = await blob.upload(`${userId}/avatar`, file, {
+                    access: 'public',
+                    allowOverwrite: true
+                });
 
-                        if (!response.ok) {
-                            throw new Error('Upload failed');
-                        }
+                if (!response) {
+                    throw new Error('Upload failed');
+                }
 
-                        const result = await response.json();
+                // Update profile with new avatar URL
+                const { data } = await client.auth.updateUser({image: response.url})
+                
+                if (!data.status) throw Error('Error updating profile picture!');
 
-                        if (!result.url) {
-                            throw new Error('No URL returned from upload');
-                        }
+                return data.url
 
-                        // Update profile with new avatar URL
-                        await api.updateProfile(userId, { avatar_url: result.url });
+            } catch (error) {
+                console.error('Avatar upload error:', error);
+                
+            }
 
-                        resolve(result.url);
-                    } catch (error) {
-                        console.error('Avatar upload error:', error);
-                        reject(error);
-                    }
-                };
-                reader.onerror = () => reject(reader.error);
-                reader.readAsDataURL(file);
-            });
         } catch (error) {
             console.error('Avatar upload error:', error);
             throw error;
