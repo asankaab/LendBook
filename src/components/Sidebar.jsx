@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { LayoutDashboard, Users, Settings, LogOut, Sun, Moon, Menu, X, Loader2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useContext, useState } from 'react';
@@ -148,6 +148,28 @@ export default function Sidebar() {
                         <LogOut size={20} />
                         <span>Sign Out</span>
                     </button>
+
+                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '1rem', fontSize: '0.75rem', justifyContent: 'center' }}>
+                        <Link
+                            to="/privacy"
+                            onClick={closeMobileMenu}
+                            style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}
+                            onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                            onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                        >
+                            Privacy
+                        </Link>
+                        <span style={{ color: 'var(--border-color)' }}>•</span>
+                        <Link
+                            to="/terms"
+                            onClick={closeMobileMenu}
+                            style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}
+                            onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                            onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                        >
+                            Terms
+                        </Link>
+                    </div>
                 </div>
             </aside>
         </>

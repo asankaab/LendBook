@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 
@@ -220,6 +220,43 @@ export default function Login() {
                     <Loader2 style={{ animation: 'spin 1s linear infinite' }} size={20} />
                     <small>Redirecting...</small>
                 </div>}
+            </div>
+
+            {/* Footer Links */}
+            <div style={{ 
+                marginTop: '2rem', 
+                textAlign: 'center', 
+                fontSize: '0.875rem',
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '1.5rem',
+                flexWrap: 'wrap'
+            }}>
+                <Link 
+                    to="/privacy" 
+                    style={{
+                        color: 'var(--text-secondary)',
+                        textDecoration: 'none',
+                        transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                    onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                >
+                    Privacy Policy
+                </Link>
+                <span style={{ color: 'var(--border-color)' }}>•</span>
+                <Link 
+                    to="/terms" 
+                    style={{
+                        color: 'var(--text-secondary)',
+                        textDecoration: 'none',
+                        transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                    onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                >
+                    Terms of Service
+                </Link>
             </div>
         </div>
     );
