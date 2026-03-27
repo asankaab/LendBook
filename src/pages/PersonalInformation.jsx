@@ -15,9 +15,9 @@ export default function PersonalInformation() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const fileInputRef = useRef(null);
     const [formData, setFormData] = useState({
-        full_name: '',
+        name: '',
         email: '',
-        avatar_url: ''
+        image: ''
     });
     const [message, setMessage] = useState('');
 
@@ -30,12 +30,12 @@ export default function PersonalInformation() {
 
                 // Fetch profile data
                 try {
-                    const profile = await api.getProfile(user.id);
+                    const profile = await api.getProfile();
                     if (profile) {
                         setFormData({
-                            full_name: profile.full_name || '',
+                            name: user.name || '',
                             email: user.email, // Keep email from auth to ensure accuracy
-                            avatar_url: profile.avatar_url || ''
+                            image: user.image || ''
                         });
                     }
                 } catch (err) {
@@ -58,9 +58,8 @@ export default function PersonalInformation() {
         setMessage('');
 
         try {
-            await api.updateProfile(user.id, {
-                full_name: formData.full_name,
-                updated_at: new Date()
+            await api.updateProfile({
+                name: formData.name
             });
             setMessage('Profile updated successfully!');
         } catch (error) {
@@ -92,7 +91,7 @@ export default function PersonalInformation() {
 
         try {
             const publicUrl = await api.uploadAvatar(user.id, file);
-            setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
+            setFormData(prev => ({ ...prev, image: publicUrl }));
             setMessage('Profile picture updated successfully!');
         } catch (error) {
             console.error('Error uploading avatar:', error);
@@ -108,7 +107,7 @@ export default function PersonalInformation() {
 
         try {
             await api.deleteAvatar(user.id);
-            setFormData(prev => ({ ...prev, avatar_url: '' }));
+            setFormData(prev => ({ ...prev, image: '' }));
             setMessage('Profile picture removed successfully!');
         } catch (error) {
             console.error('Error deleting avatar:', error);
@@ -167,7 +166,7 @@ export default function PersonalInformation() {
                                 width: '80px',
                                 height: '80px',
                                 borderRadius: '50%',
-                                background: formData.avatar_url ? 'transparent' : 'var(--bg-secondary)',
+                                background: formData.image ? 'transparent' : 'var(--bg-secondary)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -177,17 +176,17 @@ export default function PersonalInformation() {
                                 border: '1px solid var(--border-color)',
                                 overflow: 'hidden'
                             }}>
-                                {formData.avatar_url ? (
+                                {formData.image ? (
                                     <img
-                                        src={formData.avatar_url}
+                                        src={formData.image}
                                         alt="Profile"
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                     />
                                 ) : (
-                                    formData.full_name ? formData.full_name.charAt(0).toUpperCase() : <User />
+                                    formData.name ? formData.name.charAt(0).toUpperCase() : <User />
                                 )}
                             </div>
-                            {formData.avatar_url && (
+                            {formData.image && (
                                 <button
                                     type="button"
                                     onClick={() => setIsDeleteModalOpen(true)}
@@ -260,8 +259,8 @@ export default function PersonalInformation() {
                             <User size={20} style={{ color: 'var(--text-secondary)' }} />
                             <input
                                 type="text"
-                                value={formData.full_name}
-                                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 placeholder="Enter your full name"
                                 style={{
                                     background: 'transparent',

@@ -5,8 +5,7 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import InstallPrompt from './components/InstallPrompt';
 import RouteLoadingFallback from './components/RouteLoadingFallback';
-import ErrorBoundary from './components/ErrorBoundary';
-import RouteError from './components/RouteError';
+import { ErrorBoundary, RouteError } from './components/Error';
 
 // Lazy load pages for code splitting
 const Dashboard = lazy(() => import('./pages/Dashboard'));

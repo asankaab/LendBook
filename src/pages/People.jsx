@@ -23,7 +23,7 @@ export default function People() {
     };
 
     const handleCreatePerson = async ({ name, username }) => {
-        await api.createPerson(user.id, { name, username });
+        await api.createPerson({ name, username });
         revalidate();
     };
 
@@ -112,7 +112,7 @@ export default function People() {
                 {people
                     .filter((person) => {
                         const searchLower = searchQuery.toLowerCase();
-                        return person.name.toLowerCase().includes(searchLower) || person.username.toLowerCase().includes(searchLower);
+                        return person.username && person.username.includes(searchLower);
                     })
                     .map((person) => (
                         <div

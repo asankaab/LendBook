@@ -50,37 +50,17 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf,eot}'],
         navigateFallback: 'index.html',
         runtimeCaching: [
-          // People list - cache for 24 hours (changes infrequently)
+          // Neon data API - network first
           {
-            urlPattern: /\/rest\/v1\/people/,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'people-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 3600 * 24 // 24 hours
-              }
-            }
-          },
-          // Transactions - network first, cache for 5 minutes
-          {
-            urlPattern: /\/rest\/v1\/transactions/,
+            urlPattern: ({ url }) => url.origin.includes('neon.tech'),
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'transactions-cache',
+              cacheName: 'neon-data-cache',
+              networkTimeoutSeconds: 10,
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 300 // 5 minutes
               }
-            }
-          },
-          // Supabase auth - network first
-          {
-            urlPattern: /\/auth\/v1\/(token|user|session)/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'auth-cache',
-              networkTimeoutSeconds: 10
             }
           },
           // Images and avatars - cache first, 30 days
@@ -104,7 +84,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor': ['react', 'react-dom', 'react-router-dom'],
-          'supabase': ['@supabase/supabase-js'],
           'charts': ['recharts'],
           'icons': ['lucide-react']
         }
