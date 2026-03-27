@@ -58,8 +58,7 @@ export const AuthProvider = ({ children }) => {
         },
         signInWithGoogle: async () => {
             return await client.auth.signIn.social({
-                provider: 'google',
-                callbackURL: import.meta.env.VITE_SITE_URL
+                provider: 'google'
             });
         },
         signInWithMagicLink: async ({ email }) => {
