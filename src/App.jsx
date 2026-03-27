@@ -15,6 +15,8 @@ const Transactions = lazy(() => import('./pages/Transactions'));
 const Settings = lazy(() => import('./pages/Settings'));
 const PersonalInformation = lazy(() => import('./pages/PersonalInformation'));
 const CurrencySettings = lazy(() => import('./pages/CurrencySettings'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 
 import { AuthProvider } from './contexts/AuthProvider';
 import { dashboardLoader, peopleLoader, personDetailsLoader, transactionsLoader } from './lib/loaders';
@@ -23,6 +25,16 @@ const router = createBrowserRouter([
     {
         path: "/login",
         element: <Login />,
+        errorElement: <RouteError/>
+    },
+    {
+        path: "/privacy",
+        element: <Suspense fallback={<RouteLoadingFallback />}><PrivacyPolicy /></Suspense>,
+        errorElement: <RouteError/>
+    },
+    {
+        path: "/terms",
+        element: <Suspense fallback={<RouteLoadingFallback />}><TermsOfService /></Suspense>,
         errorElement: <RouteError/>
     },
     {
