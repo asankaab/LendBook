@@ -141,14 +141,16 @@ export const api = {
         return data?.[0];
     },
 
-    updateCurrency: async (userId, currency) => {
-        const { data, error } = await client
-            .from('profiles')
-            .update({ currency })
-            .eq('user_id', userId)
-            .select();
-        if (error) throw error;
-        return data?.[0];
+    updateCurrency: (currency) => {
+        if (!currency) {
+            throw new Error('Currency is required');
+        }
+        localStorage.setItem('currency', currency);
+        return currency;
+    },
+
+    getCurrency: () => {
+        return localStorage.getItem('currency') || 'USD';
     },
 
     uploadAvatar: async (userId, file) => {
