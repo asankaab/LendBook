@@ -157,8 +157,23 @@ export const api = {
                 throw new Error('No file provided');
             }
 
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                throw new Error('File must be an image');
+            }
+
+            // Validate file size (2MB)
+            const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+            if (file.size > maxSize) {
+                throw new Error('File size must be less than 2MB');
+            }
+
+            // file name
+
+            const fileName = 'avatar.' + file.name.split('.')[1];
+
             // Call blob storage to handle upload
-            const response = await blob.upload(`${userId}/avatar`, file, {
+            const response = await blob.upload(`${userId}/${fileName}`, file, {
                 access: 'public',
                 allowOverwrite: true
             });
@@ -179,14 +194,18 @@ export const api = {
         }
     },
 
-    deleteAvatar: async (userId) => {
+    deleteAvatar: async (path) => {
         try {
-            // Delete from blob storage
-            await blob.del(`${userId}/avatar`);
 
             // Clear image from auth user profile
             const { error } = await client.auth.updateUser({ image: null });
+
             if (error) throw error;
+
+            // Delete from blob storage
+            blob.del(`${path}`);
+
+            
         } catch (error) {
             console.error('Avatar deletion error:', error);
             throw error;

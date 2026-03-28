@@ -93,6 +93,7 @@ export default function PersonalInformation() {
             const publicUrl = await api.uploadAvatar(user.id, file);
             setFormData(prev => ({ ...prev, image: publicUrl }));
             setMessage('Profile picture updated successfully!');
+            setUploading(false)
         } catch (error) {
             console.error('Error uploading avatar:', error);
             setMessage('Failed to upload profile picture.');
@@ -102,7 +103,7 @@ export default function PersonalInformation() {
     };
 
     const handleDeleteAvatar = async () => {
-        setUploading(true);
+        setSaving(true);
         setMessage('');
 
         try {
@@ -113,7 +114,7 @@ export default function PersonalInformation() {
             console.error('Error deleting avatar:', error);
             setMessage('Failed to remove profile picture.');
         } finally {
-            setUploading(false);
+            setSaving(false);
         }
     };
 

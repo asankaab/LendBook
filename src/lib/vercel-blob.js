@@ -10,6 +10,7 @@ const blob = {
   upload: (pathname, file, options = {}) => {
     return put(pathname, file, {
       access: 'public',
+      allowOverwrite: true,
       ...options,
       token,
     });
