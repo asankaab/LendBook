@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@neondatabase/neon-js": "^0.2.0-beta.1",
-    "@vercel/blob": "^0.24.1",
+    "@vercel/blob": "^2.3.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.559.0",
     "react": "^19.2.0",
@@ -31,6 +31,6 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "sharp": "^0.34.5",
-    "vite": "^7.2.4"
+    "vite": "^7.3.2"
   }
 }
