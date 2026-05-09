@@ -23,22 +23,12 @@ export const AuthProvider = ({ children }) => {
         };
 
         checkSession();
+        
+        // Load currency from localStorage on mount
+        const savedCurrency = api.getCurrency();
+        setCurrency(savedCurrency);
     }, []);
 
-    useEffect(() => {
-        const loadProfile = async () => {
-            if (!user?.id) return;
-            try {
-                const profile = await api.getProfile(user.id);
-                if (profile?.currency) {
-                    setCurrency(profile.currency.toUpperCase());
-                }
-            } catch (error) {
-                console.error('Error loading profile:', error);
-            }
-        };
-        loadProfile();
-    }, [user?.id]);
 
     const value = {
         signInWithPassword: async (email, password) => {
@@ -58,8 +48,7 @@ export const AuthProvider = ({ children }) => {
         },
         signInWithGoogle: async () => {
             return await client.auth.signIn.social({
-                provider: 'google',
-                callbackURL: import.meta.env.VITE_SITE_URL
+                provider: 'google'
             });
         },
         signInWithMagicLink: async ({ email }) => {
@@ -84,6 +73,7 @@ export const AuthProvider = ({ children }) => {
         currency,
         setCurrency: (newCurrency) => {
             setCurrency(newCurrency);
+            api.updateCurrency(newCurrency);
         }
     };
 

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 
@@ -81,11 +81,12 @@ export default function Login() {
     };
 
     return (
-        <div className="flex items-center justify-center center h-screen">
-            <div className="glass" style={{ padding: '3rem', borderRadius: '1rem', width: '100%', maxWidth: '400px' }}>
-                <h1 style={{ marginBottom: '2rem', fontSize: '2rem', textAlign: 'center' }}>
-                    Lendbook
-                </h1>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+                <div className="glass" style={{ padding: '3rem', borderRadius: '1rem', width: '100%', maxWidth: '400px' }}>
+                    <h1 style={{ marginBottom: '2rem', fontSize: '2rem', textAlign: 'center' }}>
+                        Lendbook
+                    </h1>
 
                 {error && <div style={{ color: 'var(--danger)', fontSize: '0.875rem', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
                 {!error && magicLinkSent && (
@@ -220,6 +221,44 @@ export default function Login() {
                     <Loader2 style={{ animation: 'spin 1s linear infinite' }} size={20} />
                     <small>Redirecting...</small>
                 </div>}
+                </div>
+            </div>
+
+            {/* Footer Links */}
+            <div style={{ 
+                padding: '2rem',
+                textAlign: 'center', 
+                fontSize: '0.875rem',
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '1.5rem',
+                flexWrap: 'wrap'
+            }}>
+                <Link 
+                    to="/privacy" 
+                    style={{
+                        color: 'var(--text-secondary)',
+                        textDecoration: 'none',
+                        transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                    onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                >
+                    Privacy Policy
+                </Link>
+                <span style={{ color: 'var(--border-color)' }}>•</span>
+                <Link 
+                    to="/terms" 
+                    style={{
+                        color: 'var(--text-secondary)',
+                        textDecoration: 'none',
+                        transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                    onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                >
+                    Terms of Service
+                </Link>
             </div>
         </div>
     );
